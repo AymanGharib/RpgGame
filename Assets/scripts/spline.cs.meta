@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 9bd6aa4ac94daca4981ac709ea4e43a6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - halway: {fileID: 4403918392336992261, guid: 29fe7cf9ddbbbb34ea9c95c0d97d26af, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

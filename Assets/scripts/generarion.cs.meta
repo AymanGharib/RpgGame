@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0398163d86018664c94da89471ab8876
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - nodePrefab: {fileID: 8294478303469550683, guid: af66bce4556e9ad489faf006ef9ae85a, type: 3}
+  - hallway: {fileID: 4403918392336992261, guid: 29fe7cf9ddbbbb34ea9c95c0d97d26af, type: 3}
+  - room: {fileID: 8288435509748086284, guid: 89ca52e232cb03d47a02f6672b3dcfbd, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
