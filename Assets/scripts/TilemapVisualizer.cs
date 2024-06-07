@@ -10,34 +10,6 @@ using UnityEngine.UIElements;
 using UnityEngine.WSA;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 public class TilemapVisualizer : MonoBehaviour
 {
     // [SerializeField] private Tilemap tilemap;
@@ -50,6 +22,7 @@ public class TilemapVisualizer : MonoBehaviour
     [SerializeField] private GameObject wallPrefab2;
     public GameObject enemy;
     public GameObject enemy2;
+   
     public GameObject item1;
     public GameObject item2;
     public GameObject item3;
@@ -62,19 +35,31 @@ public class TilemapVisualizer : MonoBehaviour
     public List<GraphNode> Grid = new List<GraphNode>();
     Player player;
 
+    /*ISpawner<int> enemySpawner;
+    ISpawner<int> itemSpawner; */
+    private IAbstractFactory enemy1Factory;
+    private IAbstractFactory enemy2Factory;
 
     void Start()
     {
         player = new Player();
+
+
+        enemy1Factory = new Enemy1Factory(enemy, item1, item2);
+        enemy2Factory = new Enemy2Factory(enemy2, item2, item3);
+
+
+
+
         //PaintWholeTilemapExcept(tiles, Tilemap, floorTile);
 
-        StartCoroutine(CreateWallsWithDelay());
+ StartCoroutine(CreateWallsWithDelay());
 
 
 
 
 
-
+        
 
 
 
@@ -214,7 +199,13 @@ public class TilemapVisualizer : MonoBehaviour
         foreach (GraphNode node in path)
         {
 
-            UnityEngine.Debug.DrawLine(node.Position, node.Position, Color.black);
+             foreach(GraphNode n in GetNeighbours(node)) {
+                  if (path.Contains(n))
+                UnityEngine.Debug.DrawLine(node.Position, n.Position, Color.black, 500f);
+            }
+
+
+          
 
 
 
@@ -352,17 +343,16 @@ public class TilemapVisualizer : MonoBehaviour
 
     }
 
-
+   
     
 
     IEnumerator CreateWallsWithDelay()
     {
-        yield return new WaitForSeconds(2f); // Change 2f to the delay time you want
-
+        yield return new WaitForSeconds(2f); 
 
         spawnwalls(tiles);
-        spawnEnemies(tiles);
-        spawnItems(tiles);
+spawnEnemies(tiles);
+       // spawnItems(tiles);
         // CreateGrid();
 Destroy(floorTilemap.gameObject);
 
@@ -389,7 +379,7 @@ Destroy(floorTilemap.gameObject);
 
 
 
-        //OnDrawGizmosSelected();F
+      //  OnDrawGizmosSelected();
 
 
 
@@ -452,24 +442,86 @@ Destroy(floorTilemap.gameObject);
 
 
 
+    /*
 
 
-
-   /* private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         if (Grid != null)
         {
             foreach (GraphNode node in Grid)
-            {    
+            {
                 Gizmos.color = Color.red;
                 Gizmos.DrawCube(node.Position, Vector3.one);
             }
         }
     }*/
+
     public int maxEnemies = 5;
-    public int maxItems = 10;
+   
+ 
+    public void spawnEnemies(List<Vector3> tiles)
+    {
+        int random = UnityEngine.Random.Range(1, 3);
+        Vector3 randomTile = new Vector3();
+        Vector3 randomTile2 = new Vector3();
+        Vector3 randomTile3 = new Vector3();
+        List<Vector3> list = new List<Vector3>();
+        for (int i = 0; i < 10; i++)
+        {
+            while (list.Contains(randomTile))
+            {
+                randomTile = tiles[UnityEngine.Random.Range(0, tiles.Count)];
+                randomTile2 = tiles[UnityEngine.Random.Range(0, tiles.Count)];
+                randomTile3 = tiles[UnityEngine.Random.Range(0, tiles.Count)];
+            }
+      
+            list.Add(randomTile); 
+
+             
+      
+
+           // Randomly generates 1 or 2
+
+            if (nodegen.playerType == 1)
+            {
+                enemy1Factory.Spawn(randomTile , randomTile2, randomTile3);
+            } 
+            else  if(nodegen.playerType  == 2)
+            {
+                enemy2Factory.Spawn(randomTile, randomTile2, randomTile3);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("we coudnt find the foundable"); 
 
 
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 
     public void spawnEnemies(List<Vector3> tiles)
     {
         for (int i = 0; i < maxEnemies; i++)
@@ -477,14 +529,7 @@ Destroy(floorTilemap.gameObject);
             Vector3 randomTile = tiles[UnityEngine.Random.Range(0, tiles.Count)];
             int random = UnityEngine.Random.Range(1, 3); // Randomly generates 1 or 2
 
-            if (random == 1)
-            {
-                Instantiate(enemy, randomTile, Quaternion.identity); // Instantiate enemy type 1
-            }
-            else
-            {
-                Instantiate(enemy2, randomTile, Quaternion.identity); // Instantiate enemy type 2
-            }
+            enemySpawner.Spawn(random, randomTile);
         }
     }
 
@@ -495,21 +540,62 @@ Destroy(floorTilemap.gameObject);
             Vector3 randomTile = tiles[UnityEngine.Random.Range(0, tiles.Count)];
             int random = UnityEngine.Random.Range(1, 4); // Randomly generates 1, 2, or 3
 
-            if (random == 1)
-            {
-                Instantiate(item1, randomTile, Quaternion.identity); // Instantiate item type 1
-            }
-            else if (random == 2)
-            {
-                Instantiate(item2, randomTile, Quaternion.identity); // Instantiate item type 2
-            }
-            else
-            {
-                Instantiate(item3, randomTile, Quaternion.identity); // Instantiate item type 3
-            }
+            itemSpawner.Spawn(random, randomTile);
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+public void spawnEnemies(List<Vector3> tiles)
+     {
+         for (int i = 0; i < maxEnemies; i++)
+         {
+             Vector3 randomTile = tiles[UnityEngine.Random.Range(0, tiles.Count)];
+             int random = UnityEngine.Random.Range(1, 3); // Randomly generates 1 or 2
+
+             if (random == 1)
+             {
+                 Instantiate(enemy, randomTile, Quaternion.identity); // Instantiate enemy type 1
+             }
+             else
+             {
+                 Instantiate(enemy2, randomTile, Quaternion.identity); // Instantiate enemy type 2
+             }
+         }
+     }
+
+     public void spawnItems(List<Vector3> tiles)
+     {
+         for (int i = 0; i < maxItems; i++)
+         {
+             Vector3 randomTile = tiles[UnityEngine.Random.Range(0, tiles.Count)];
+             int random = UnityEngine.Random.Range(1, 4); // Randomly generates 1, 2, or 3
+
+             if (random == 1)
+             {
+                 Instantiate(item1, randomTile, Quaternion.identity); // Instantiate item type 1
+             }
+             else if (random == 2)
+             {
+                 Instantiate(item2, randomTile, Quaternion.identity); // Instantiate item type 2
+             }
+             else
+             {
+                 Instantiate(item3, randomTile, Quaternion.identity); // Instantiate item type 3
+             }
+         }
+     }
+     */
     public void PaintFloorTiles(IEnumerable<Vector3> floorpos)
     {
         PaintTiles(floorpos, floorTilemap, floorTile, floorPrefab);

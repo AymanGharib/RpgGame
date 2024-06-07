@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Unity.VisualScripting;
 using UnityEditor.ShaderGraph.Internal;
@@ -16,15 +17,16 @@ public class Player : MonoBehaviour
     public bool CollidesWithItem = false;
     public GameObject Astar;
     public GameObject Djikstra;
+    public GameObject Controller; 
     // public GameObject Menu;
-
+    
     public float moveSpeed = 5f;
     public Rigidbody2D rb;
     // private Pathfinding pathfinding;
     private Vector2 moveDirection = Vector2.zero;
 
     // private bool isMovingToTail = false; // Flag to indicate if the player is moving to the tail
-    private List<Node> pathToTail = new List<Node>(); // List to store the path to the tail
+    //private List<Node> pathToTail = new List<Node>(); // List to store the path to the tail
 
     public GameObject bullet;
     public float lastFire;
@@ -76,38 +78,115 @@ public class Player : MonoBehaviour
     // Rest of your Player class...
 
 
-
+    
 
 
     private void Update()
     {
 
+        if (GameController.amount >= 3)
+        {
+            //  Debug.Log(gameObject.name + " collided with an enemy.");
 
 
-      
+            GameObject menuButton = Instantiate(Astar, canvas.transform);
+            GameObject b = Instantiate(Djikstra, canvas.transform);
+
+            // You might want to position the button based on your UI layout
+
+            // Optionally, you can add listeners to the button's onClick event to handle its functionality
+            Button buttonComponent = menuButton.GetComponent<Button>();
+            Button butto = b.GetComponent<Button>();
+
+            if (butto != null)
+
+            {
+                Debug.Log("Button clicked!");
+                butto.onClick.AddListener(() =>
+                {
+                    Destroy(menuButton);
+                    Destroy(b);
+
+                    djiksra = true;
+                });
+            }
 
 
-if (transform.position == nodeGenerator.e)
+
+
+
+
+
+
+            if (buttonComponent != null)
+
+            {
+                Debug.Log("Button clicked!");
+                buttonComponent.onClick.AddListener(() =>
+                {
+                    Destroy(menuButton);
+                    Destroy(b);
+                    // Handle button click action here, such as reloading the level or going to the main menu
+                    collidedWithEnemy = true;
+
+                });
+            }
+
+            GameController.amount = 0; 
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        if (transform.position == nodeGenerator.e)
         {
             SceneManager.LoadScene("menu");
 
 
         }
 
-        
-            FireDelay = GameController.FireRate;
-            moveSpeed = GameController.MoveSpeed;
-            ProcessInputs();
-            float shootH = Input.GetAxis("shootHorizontal");
-            float shootV = Input.GetAxis("shootVertical");
-            if (shootH != 0 || shootV != 0 && Time.time > lastFire + FireDelay)
-            {
-                shoot(shootH, shootV);
+
+        FireDelay = GameController.FireRate;
+        moveSpeed = GameController.MoveSpeed;
+        ProcessInputs();
+        float shootH = Input.GetAxis("shootHorizontal");
+        float shootV = Input.GetAxis("shootVertical");
+        if (shootH != 0 || shootV != 0 && Time.time > lastFire + FireDelay)
+        {
+            shoot(shootH, shootV);
 
 
-                lastFire = Time.time;
-            }
-        
+            lastFire = Time.time;
+        }
+
 
 
 
@@ -115,10 +194,10 @@ if (transform.position == nodeGenerator.e)
                 )
         {
 
-
+            
             nodeGenerator.StartPathfindingDjikstra(transform.position);
 
-            GetComponent<Collider2D>().isTrigger = true;
+           // GetComponent<Collider2D>().isTrigger = true;
             //moveSpeed = 0;
             moveDirection = Vector2.zero;
             StartCoroutine(MoveAlongPathAfterDelayDjikstra(0.0001f));
@@ -153,7 +232,7 @@ if (transform.position == nodeGenerator.e)
         if ((collidedWithEnemy) && nodeGenerator != null)
         //  if (==5     &&      nodeGenerator != null)
         {
-            GetComponent<Collider2D>().isTrigger = false;
+           // GetComponent<Collider2D>().isTrigger = false;
             FireDelay = GameController.FireRate;
             moveSpeed = GameController.MoveSpeed;
             float shootH1 = Input.GetAxis("shootHorizontal");
@@ -340,7 +419,7 @@ if (transform.position == nodeGenerator.e)
 
         while (i < nodeGenerator.DjikstraPath.Count)
         {
-
+            
             Vector3 targetPosition = nodeGenerator.DjikstraPath[i].Position;
 
 
@@ -424,8 +503,35 @@ if (transform.position == nodeGenerator.e)
         }
 
 
-
+     //   Instantiate(Controller); 
     }
+
+    private int level = 0;
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -444,100 +550,76 @@ if (transform.position == nodeGenerator.e)
 
         if (other.gameObject.CompareTag("tale"))
         {
-
-
-            SceneManager.LoadScene("menu");
-        }
-
-
-
-        if (GameController.amount >= 3)
-        {
-            Debug.Log(gameObject.name + " collided with an enemy.");
-
-
-            GameObject menuButton = Instantiate(Astar, canvas.transform);
-            GameObject b = Instantiate(Djikstra, canvas.transform);
-
-            // You might want to position the button based on your UI layout
-
-            // Optionally, you can add listeners to the button's onClick event to handle its functionality
-            Button buttonComponent = menuButton.GetComponent<Button>();
-            Button butto = b.GetComponent<Button>();
-
-            if (butto != null)
-
+            if (level == 0)
             {
-                Debug.Log("Button clicked!");
-                butto.onClick.AddListener(() =>
-                {
-                    Destroy(menuButton);
-                    Destroy(b);
+                SceneManager.LoadScene("menu");
+                level++;
 
-                    djiksra = true;
-                });
             }
 
 
-
-
-
-
-
-
-            if (buttonComponent != null)
-
             {
-                Debug.Log("Button clicked!");
-                buttonComponent.onClick.AddListener(() =>
+                if (level == 1)
                 {
-                    Destroy(menuButton);
-                    Destroy(b);
-                    // Handle button click action here, such as reloading the level or going to the main menu
-                    collidedWithEnemy = true;
-                });
+                    SceneManager.LoadScene("win");
+
+                    nodeGenerator.playerType = 1; 
+                    level--;
+
+                }
+
+
+
+
+
+
+
+
             }
-        }
+
+         
+
+                
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        if (other.gameObject.CompareTag("Enemy"))
-        {
-            Debug.Log(gameObject.name + " collided with an enemy.");
-
-            // Instantiate the menu panel prefab
-
-            /* 
-                 if (other.gameObject.CompareTag("Enemy"))
-                    {
-                        Debug.Log(gameObject.name + " collided with an enemy.");
-                        //SceneManager.LoadScene("menu");
-
-                       collidedWithEnemy = true; 
-                    }
             
 
 
-            if (other.gameObject.CompareTag("Enemy"))*/
 
+
+
+
+
+
+
+
+
+
+
+
+            if (other.gameObject.CompareTag("Enemy"))
+            {
+                Debug.Log(gameObject.name + " collided with an enemy.");
+
+                // Instantiate the menu panel prefab
+
+                /* 
+                     if (other.gameObject.CompareTag("Enemy"))
+                        {
+                            Debug.Log(gameObject.name + " collided with an enemy.");
+                            //SceneManager.LoadScene("menu");
+
+                           collidedWithEnemy = true; 
+                        }
+
+
+                F
+                if (other.gameObject.CompareTag("Enemy"))*/
+
+
+            }
 
         }
-
     }
 }
 

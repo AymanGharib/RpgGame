@@ -13,10 +13,13 @@ public class GameController : MonoBehaviour
 
     private static float moveSpeed  =5f;
     public static int amount =   0;
+    public static int Totalamount = 0;
     public static float fireRate = 5f;
     private static float bulletsize = 0.1f;
     public  Text healthText;
-    public Text amountText; 
+    public Text amountText;
+    public Text TotalamountText;
+
 
     public static float Health { get => health; set => health  =value;  }
     public static float MaxHealth { get => maxHealth; set => maxHealth = value; }
@@ -27,20 +30,26 @@ public class GameController : MonoBehaviour
     void Start()
     {
         
+
+        
+
     }
 
     // Update is called once per frame
     void Update()
     {
         healthText.text = "health " + health;
-        amountText.text = "Amount " + amount; 
+        amountText.text = "Amount " + amount;
+        TotalamountText.text = "Total" + Totalamount; 
 
 
     }
-  /*public void Awake()
+   public void Awake()
     {
-         if  (instance == null) { instance = this;  }
-    }  */
+         if  (instance == null) { instance = this;
+        }
+
+    }  
    
     public static void DamagePlayer (int damage) {
 
@@ -73,7 +82,8 @@ public class GameController : MonoBehaviour
     public static void movespeed(float speed) {
 
         moveSpeed += speed;
-        amount++; 
+        amount++;
+        Totalamount++;
        
     }
 

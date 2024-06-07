@@ -41,7 +41,7 @@ public class NodeGenerator : MonoBehaviour
     public GameObject b;
     public Vector3 s = new Vector3();
     public Vector3 e = new Vector3();
-    private Pathfinding pathfinding;
+   
     Player p ;
     public GameObject door;
     public GameObject tail;
@@ -49,11 +49,16 @@ public class NodeGenerator : MonoBehaviour
     public TilemapVisualizer tilemapVisualizer;
     private List<GraphNode> nodes = new List<GraphNode>();
     public GameObject player;
+      public int playerType = 0;  
+    public GameObject player2;
 
-
+    private IAbstractFactory enemy1Factory;
+    private IAbstractFactory enemy2Factory;
+  
     void Start()
     {
-
+        enemy1Factory = new Enemy1Factory(enemy, item1, item2);
+        enemy2Factory = new Enemy2Factory(enemy2, item2, item3);
         Generate();
 
     }
@@ -77,15 +82,16 @@ public class NodeGenerator : MonoBehaviour
     {
 
 
-        p = GetComponent<Player>();
+       // p = GetComponent<Player>();
         PlaceNodes();
         GenerateRandomConnections();
 
         //parcours_dfs(nodes);
-        PRIM(nodes); 
-      
-        head_tail(nodes);
-        Creategrid();
+ PRIM(nodes);
+     
+    head_tail(nodes);
+      //  spawnEnemies(getPosFromNodes(nodes));
+     Creategrid();
       
         
         
@@ -96,9 +102,6 @@ public class NodeGenerator : MonoBehaviour
         foreach(GraphNode node in nodes)
         {
             Debug.Log(node.ConnectedNodesAfterPrim.Count  + "AAAAAAAAAAAAAAAA") ; 
-
-
-
 
         }
         
@@ -134,10 +137,6 @@ public class NodeGenerator : MonoBehaviour
             i++;
         }
        */
-
-
-
-
 
 
 
@@ -208,7 +207,7 @@ public class NodeGenerator : MonoBehaviour
             Debug.LogError("TilemapVisualizer reference is null.");
         }
     }
-
+    
     public void StartPathfindingDjikstra(Vector3 startPosition)
     {
         // Ensure that the tilemapVisualizer reference is not null
@@ -229,10 +228,7 @@ public class NodeGenerator : MonoBehaviour
 
 
 
-
-
-
-    /* private void Update()
+   /* private void Update()
          {
 
 
@@ -277,37 +273,7 @@ public class NodeGenerator : MonoBehaviour
             GraphNode a = new GraphNode(tile);
             tilemapVisualizer.Grid.Add(a);
             
-          //  Grid.Add(a); 
-            /*   for (int x = -1; x <= 1; x++)
-               {
-                   for (int y = -1; y <= 1; y++)
-                   {
-
-                       if (x == 0 && y == 0)
-                           continue;
-                       float X = a.Position.x + x;
-
-                       float Y = a.Position.y + y;
-
-                       GraphNode new1 = new GraphNode(new Vector3(X, Y, 0));
-                       tilemapVisualizer.Grid.Add(new1);
-
-
-
-
-
-
-                   }*/
-
-
-
-
-
-
-
-
-
-
+          
             }
 
         }
@@ -328,10 +294,12 @@ public class NodeGenerator : MonoBehaviour
             Debug.Log(node.Position); 
             int x = Random.Range(6, 8);
             int y = Random.Range(6, 8);
-            tilemapVisualizer.CreateRoom(node.Position, x, y);
+          tilemapVisualizer.CreateRoom(node.Position, x, y);
            
             node.AssociatedObject = newNode;
             nodes.Add(node);
+           // result.Add(node.Position); 
+
         }
     }
 
@@ -370,6 +338,7 @@ public class NodeGenerator : MonoBehaviour
                 if (node != otherNode && !node.ConnectedNodes.Contains(otherNode))
                 {
                     node.ConnectedNodes.Add(otherNode);
+                 //Debug.DrawLine(node .Position, otherNode.Position, Color.yellow, 500f);
                     otherNode.ConnectedNodes.Add(node);
                 }
             }
@@ -561,8 +530,9 @@ public class NodeGenerator : MonoBehaviour
                 minimumSpanningTree.Add(minNeighbor);
                 List<Vector3> corridors = createCorridor(minNode.Position, minNeighbor.Position);
 
-                tilemapVisualizer.PaintFloorTiles((corridors));
-                Debug.DrawLine(minNode.Position, minNeighbor.Position, Color.yellow, 500f);
+        tilemapVisualizer.PaintFloorTiles((corridors));
+
+               // Debug.DrawLine(minNode.Position, minNeighbor.Position, Color.yellow, 500f);
                 minNeighbor.ConnectedNodesAfterPrim.Add(minNode);
                minNode.ConnectedNodesAfterPrim.Add(minNeighbor);
 
@@ -638,14 +608,24 @@ public class NodeGenerator : MonoBehaviour
             {
                 Debug.Log("Destroyed nodePrefab at diameterHead" + node.Position);
                 GameObject newNode = Instantiate(start, node.Position, Quaternion.identity);
+               // result.Remove(node.Position); 
               
                 source = node;
                 s = node.Position;
                 tilemapVisualizer.Grid.Add(source); 
-                source.Name = "end of the map ";    
-                Instantiate(player, node.Position, Quaternion.identity);
+                source.Name = "START";
 
-                Destroy(node.AssociatedObject);
+                int rand = Random.Range(1, 3);  
+
+              if(rand==1) {  Instantiate(player, node.Position, Quaternion.identity);
+                    playerType = 1;     }
+                if (rand == 2) { { Instantiate(player2, node.Position, Quaternion.identity);
+                        playerType = 2; 
+                    } }
+
+
+
+                    Destroy(node.AssociatedObject);
                 break; 
             }
      
@@ -748,10 +728,88 @@ public class NodeGenerator : MonoBehaviour
         }
 
         return farthestNode;
-    }  
+    }
 
 
-   
+
+
+
+ List<Vector3> getPosFromNodes(List<GraphNode>  nodes )
+    {
+
+        List<Vector3> res = new List<Vector3>(); 
+        foreach (GraphNode node in nodes) {
+
+             
+
+         res.Add(node.Position); 
+
+          
+          
+        
+        }
+
+        return res;  
+
+
+         
+    }
+
+
+
+
+
+
+
+
+    public void spawnEnemies(List<Vector3> tiles)
+    {
+        int random = UnityEngine.Random.Range(1, 3);
+        Vector3 randomTile = new Vector3();
+        List<Vector3> list = new List<Vector3>();
+    
+        for (int i = 0; i < 10; i++)
+        {
+            while (list.Contains(randomTile))
+            {
+                randomTile = tiles[UnityEngine.Random.Range(0, tiles.Count)];
+            }
+          
+           
+            list.Add(randomTile);
+
+
+
+
+            // Randomly generates 1 or 2
+
+            if (playerType == 1)
+            {
+                enemy1Factory.Spawn(randomTile, randomTile, randomTile);
+            }
+            else if (playerType ==2 ) 
+            {
+                enemy2Factory.Spawn(randomTile, randomTile, randomTile);
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
